@@ -37,13 +37,7 @@ Style: Constructive, high-level, "Systems Thinking".
 """
 
 
-@app.post("/api/chat")
-async def chat(request: Request):
-    body = await request.json()
-    user_message = body.get("message", "")
-    if not user_message:
-        return JSONResponse({"error": "Missing message"}, status_code=400)
-
+async def _call_nim(system_prompt: str, user_message: str):
     async with httpx.AsyncClient(timeout=60) as client:
         resp = await client.post(
             NIM_CHAT_URL,
@@ -54,15 +48,26 @@ async def chat(request: Request):
             json={
                 "model": "meta/llama-3.3-70b-instruct",
                 "messages": [
-                    {"role": "system", "content": CHAT_SYSTEM},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_message},
                 ],
                 "max_tokens": 512,
                 "temperature": 0.7,
             },
         )
+        resp.raise_for_status()
         data = resp.json()
-        text = data["choices"][0]["message"]["content"]
+        return data["choices"][0]["message"]["content"]
+
+
+@app.post("/api/chat")
+async def chat(request: Request):
+    body = await request.json()
+    user_message = body.get("message", "")
+    system_prompt = body.get("system", CHAT_SYSTEM)
+    if not user_message:
+        return JSONResponse({"error": "Missing message"}, status_code=400)
+    text = await _call_nim(system_prompt, user_message)
     return JSONResponse({"text": text})
 
 
@@ -70,26 +75,8 @@ async def chat(request: Request):
 async def audit(request: Request):
     body = await request.json()
     user_message = body.get("message", "")
+    system_prompt = body.get("system", AUDIT_SYSTEM)
     if not user_message:
         return JSONResponse({"error": "Missing message"}, status_code=400)
-
-    async with httpx.AsyncClient(timeout=60) as client:
-        resp = await client.post(
-            NIM_CHAT_URL,
-            headers={
-                "Authorization": f"Bearer {NIM_API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": "meta/llama-3.3-70b-instruct",
-                "messages": [
-                    {"role": "system", "content": AUDIT_SYSTEM},
-                    {"role": "user", "content": user_message},
-                ],
-                "max_tokens": 512,
-                "temperature": 0.7,
-            },
-        )
-        data = resp.json()
-        text = data["choices"][0]["message"]["content"]
+    text = await _call_nim(system_prompt, user_message)
     return JSONResponse({"text": text})
