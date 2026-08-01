@@ -1,8 +1,13 @@
 {
   "name": "ishuin-nim-proxy",
   "version": "1.0.0",
+  "description": "NVIDIA NIM proxy for portfolio AI features",
+  "main": "api/nim.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
   "dependencies": {
-    "@vercel/node": "^5.0.0",
     "node-fetch": "^3.3.2"
   }
 }

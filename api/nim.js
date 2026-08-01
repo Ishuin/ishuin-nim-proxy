@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 const NIM_CHAT_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
-const CHAT_SYYSTEM = `Identity: Ishu Kumar, Technical Lead & Systems Architect.
+const CHAT_SYSTEM = `Identity: Ishu Kumar, Technical Lead & Systems Architect.
 Tone: Professional, engineering-focused, concise, slightly technical.
 Experience: 6+ years.
 Current Role: Technical Lead (Stealth). Leading team of 6. Re-architecting E-commerce platform to Serverless Event-Driven Architecture (Azure Functions).
