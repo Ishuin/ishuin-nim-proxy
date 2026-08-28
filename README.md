@@ -1,29 +1,61 @@
 # Ishuin NIM Proxy
 
-Tiny FastAPI proxy that forwards `/api/chat` and `/api/audit` to NVIDIA NIM.
+Lightweight Node.js proxy that forwards `/api/chat` and `/api/audit` to NVIDIA NIM.
 
-## Deploy
+## Architecture
 
-### Option A: Render (recommended, free)
-1. Push this repo to GitHub.
-2. Sign up at https://render.com
-3. New + > Web Service > connect this repo
-4. Build command: `pip install -r requirements.txt`
-5. Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-6. Add env var: `NIM_API_KEY` = your NVIDIA NIM key
-7. Deploy.
-
-### Option B: One-click from GitHub (after Render service exists)
-Create these GitHub Secrets in this repo:
-- `RENDER_API_KEY`
-- `RENDER_SERVICE_ID`
-
-Then push to `main` to auto-deploy.
+```
+┌───────────┐     ┌────────────────┐     ┌─────────────┐
+│   Client  │────▶│  api/index.js  │────▶│ NVIDIA NIM  │
+│           │◀────│  (Vercel Fn)   │◀────│             │
+└───────────┘     └────────────────┘     └─────────────┘
+                        │
+                        ▼
+                  Route-based
+                  system prompt
+```
 
 ## Endpoints
-- `POST /api/chat`
-- `POST /api/audit`
 
-Body: `{ "message": "..." }`
-# redeploy trigger
-# redeploy 2
+### `POST /api/chat`
+Returns a response with a technical-conversation system prompt.
+
+**Request body:**
+```json
+{ "message": "string" }
+```
+
+### `POST /api/audit`
+Returns a response with an architectural-review system prompt.
+
+**Request body:**
+```json
+{ "message": "string" }
+```
+
+### `system` override
+Optionally include `"system": "custom prompt"` to override the default system prompt.
+
+## Configuration
+
+| Variable | Purpose |
+|----------|---------|
+| `NIM_API_KEY` | NVIDIA NIM API key |
+
+## Deployment
+
+- **Vercel:** `npm run deploy`
+- **Render:** push to `main` (uses `render.yaml`)
+
+## Local
+
+```bash
+npm install
+npm run dev
+```
+
+## Tests
+
+```bash
+npm test
+```
